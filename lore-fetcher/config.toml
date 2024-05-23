@@ -1,0 +1,8 @@
+[ fetcher ]
+mailing_list = "amd-gfx"
+fetch_interval = 30
+
+[ mailer ]
+from_mail = ""
+to_mail = ""
+password = ""
