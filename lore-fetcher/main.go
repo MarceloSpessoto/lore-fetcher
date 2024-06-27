@@ -20,7 +20,7 @@ func main(){
   configurator.ParseConfiguration(fetcher, &evaluator, &mailer)
   fmt.Println(fetcher)
   fetchBuffer := make(chan types.Patch, 100)
-  resultBuffer := make(chan string, 100)
+  resultBuffer := make(chan types.Patch, 100)
   wg.Add(3)
   go fetcher.FetchDaemon(fetchBuffer)
   go evaluator.ReceivePatches(fetchBuffer, resultBuffer)

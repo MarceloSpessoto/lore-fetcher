@@ -58,7 +58,7 @@ func (fetcher *Fetcher) FetchDaemon(fetchBuffer chan types.Patch){
   for {
     time.Sleep(30 * time.Second)
 
-    fmt.Println(time.Now(), ": Searching for new patches in ", fetcher.MailingList)
+    fmt.Println("[", time.Now(), "]: Searching for new patches in", fetcher.MailingList)
     fetcher.GetPatches()
     fetcher.processPatches(fetchBuffer)
   }
@@ -103,6 +103,8 @@ func (fetcher *Fetcher) processPatches(fetchBuffer chan types.Patch){
   for i := 0; i < len(fetcher.feed.Entries); i++ {
     patchHref := fetcher.feed.Entries[i].Link.Href
     patchTag := parsePatchTag(patchHref)
+    fmt.Println(patchHref)
+    fmt.Println(patchTag)
 
     if _, ok := fetcher.patchStatus[patchTag]; !ok {
       var patch types.Patch
@@ -113,7 +115,7 @@ func (fetcher *Fetcher) processPatches(fetchBuffer chan types.Patch){
       patch.PatchTag = patchTag
       fetcher.patchStatus[patchTag] = true
       fetchBuffer <- patch
-      fmt.Println(time.Now(), ": Sending patch ", patch.Title, " to CI Pipeline")
+      fmt.Println("[", time.Now(), "]: Sending patch '", patch.Title, "' to CI Pipeline")
     } else {
       break
     }

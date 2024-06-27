@@ -6,5 +6,7 @@ type Patch struct {
   AuthorEmail string
   PatchHref string
   PatchTag string
+  ResultString string
+  Result bool
 }
 

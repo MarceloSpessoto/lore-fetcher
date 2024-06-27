@@ -24,5 +24,5 @@ func (configurator Configurator) ParseConfiguration(fetcher *fetcher.Fetcher, ev
 
   mailer.FromMail = viper.GetString("mailer.from_mail")
   mailer.ToMail = viper.GetString("mailer.to_mail")
-  mailer.Password = viper.GetString("password")
+  mailer.Password = viper.GetString("mailer.password")
 }

@@ -9,13 +9,14 @@ import(
 type Evaluator struct {  
 }
 
-func (evaluator Evaluator) ReceivePatches(fetchBuffer chan types.Patch, resultBuffer chan string) {
+func (evaluator Evaluator) ReceivePatches(fetchBuffer chan types.Patch, resultBuffer chan types.Patch) {
   for {
     patch := <- fetchBuffer
-    fmt.Println(time.Now(), ": Testing patch ", patch.Title)
-    result, _ := ParseResult(patch)
-    fmt.Println(time.Now(), ": Patch ", patch.Title, " got the following result: ", result, ". Preparing to send the result")
-    resultBuffer <- result
+    fmt.Println("[", time.Now(), "]: Testing patch '", patch.Title, "'")
+    patch.ResultString, patch.Result = ParseResult(patch)
+    
+    fmt.Println(time.Now(), ": Patch '", patch.Title, "' got the following result: '", patch.ResultString, "'. Preparing to send the result.")
+    resultBuffer <- patch
   }
   
 }
