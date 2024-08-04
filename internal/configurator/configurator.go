@@ -11,10 +11,10 @@ import (
 type Configurator struct {
 }
 
-func (configurator Configurator) ParseConfiguration(fetcher *fetcher.Fetcher, evaluator *evaluator.Evaluator, mailer *mailer.Mailer){
+func (configurator Configurator) ParseConfiguration(fetcher *fetcher.Fetcher, evaluator *evaluator.Evaluator, mailer *mailer.Mailer, location string){
   viper.SetConfigType("toml")
   viper.SetConfigName("config")
-  viper.AddConfigPath("./lore-fetcher")
+  viper.AddConfigPath(location)
   if err := viper.ReadInConfig(); err != nil {
     panic(fmt.Errorf("error reading config file: %w", err))
   }

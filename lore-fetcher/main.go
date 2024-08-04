@@ -17,7 +17,7 @@ func main(){
   evaluator := evaluator.Evaluator{}
   mailer := mailer.Mailer{}
   configurator := configurator.Configurator{}
-  configurator.ParseConfiguration(fetcher, &evaluator, &mailer)
+  configurator.ParseConfiguration(fetcher, &evaluator, &mailer, "./lore-fetcher")
   fmt.Println(fetcher)
   fetchBuffer := make(chan types.Patch, 100)
   resultBuffer := make(chan types.Patch, 100)

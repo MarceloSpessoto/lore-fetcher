@@ -103,8 +103,6 @@ func (fetcher *Fetcher) processPatches(fetchBuffer chan types.Patch){
   for i := 0; i < len(fetcher.feed.Entries); i++ {
     patchHref := fetcher.feed.Entries[i].Link.Href
     patchTag := parsePatchTag(patchHref)
-    fmt.Println(patchHref)
-    fmt.Println(patchTag)
 
     if _, ok := fetcher.patchStatus[patchTag]; !ok {
       var patch types.Patch

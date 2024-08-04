@@ -1,0 +1,8 @@
+[ fetcher ]
+mailing_list = ""
+fetch_interval = 
+
+[ mailer ]
+from_mail = ""
+to_mail = ""
+password = ""
