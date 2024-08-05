@@ -5,10 +5,12 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-  "strings"
-  "time"
+	"regexp"
+	"strings"
+	"time"
+  "strconv"
+	"github.com/MarceloSpessoto/lore-fetcher/internal/types"
 	"golang.org/x/text/encoding/ianaindex"
-  "github.com/MarceloSpessoto/lore-fetcher/internal/types"
 )
 
 type Feed struct {
@@ -27,11 +29,16 @@ type Fetcher struct {
   patchStatus map[string]bool
   MailingList string
   FetchInterval int  
+  JenkinsServer string
+  JenkinsPipeline string
+  JenkinsToken string
 }
 
-func NewFetcher() *Fetcher {
+func NewFetcher(mailingList string, fetchInterval string) *Fetcher {
   var fetcher Fetcher
   fetcher.patchStatus = make(map[string]bool)
+  fetcher.MailingList = mailingList
+  fetcher.FetchInterval, _ = strconv.Atoi(fetchInterval)
   return &fetcher
 }
 
@@ -41,7 +48,7 @@ func parsePatchTag(href string) string{
   return patchTagComponents[0]
 }
 
-func (fetcher *Fetcher) FetchDaemon(fetchBuffer chan types.Patch){
+func (fetcher *Fetcher) FetchDaemon(){
   for {
     fetcher.GetPatches()
     if len(fetcher.feed.Entries) == 0 {
@@ -60,13 +67,13 @@ func (fetcher *Fetcher) FetchDaemon(fetchBuffer chan types.Patch){
 
     fmt.Println("[", time.Now(), "]: Searching for new patches in", fetcher.MailingList)
     fetcher.GetPatches()
-    fetcher.processPatches(fetchBuffer)
+    fetcher.processPatches()
   }
 }
 
-func (fetcher *Fetcher) FetchBatch(fetchBuffer chan types.Patch){
+func (fetcher *Fetcher) FetchBatch(){
   fetcher.GetPatches()
-  fetcher.processPatches(fetchBuffer)
+  fetcher.processPatches()
 }
 
 func (fetcher *Fetcher) GetPatches() {
@@ -99,7 +106,7 @@ func (fetcher *Fetcher) GetPatches() {
   fetcher.feed = feed
 }
 
-func (fetcher *Fetcher) processPatches(fetchBuffer chan types.Patch){
+func (fetcher *Fetcher) processPatches(){
   for i := 0; i < len(fetcher.feed.Entries); i++ {
     patchHref := fetcher.feed.Entries[i].Link.Href
     patchTag := parsePatchTag(patchHref)
@@ -112,10 +119,17 @@ func (fetcher *Fetcher) processPatches(fetchBuffer chan types.Patch){
       patch.PatchHref = patchHref
       patch.PatchTag = patchTag
       fetcher.patchStatus[patchTag] = true
-      fetchBuffer <- patch
       fmt.Println("[", time.Now(), "]: Sending patch '", patch.Title, "' to CI Pipeline")
     } else {
       break
     }
   }
+}
+
+// A temporary method to assert we're fetching a Patch message:
+// checking if the title string contains the [PATCH] tag
+func isPatch(patchTitle string) bool {
+  fmt.Println(patchTitle)
+  hasPattern, _ := regexp.Match(`.*\[.*PATCH.*\].*`, []byte(patchTitle))
+  return hasPattern
 }

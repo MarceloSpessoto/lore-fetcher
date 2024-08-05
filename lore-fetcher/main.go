@@ -6,7 +6,7 @@ import (
 
 	//"github.com/MarceloSpessoto/lore-fetcher/internal/configurator"
 	//"github.com/MarceloSpessoto/lore-fetcher/internal/evaluator"
-	//"github.com/MarceloSpessoto/lore-fetcher/internal/fetcher"
+	"github.com/MarceloSpessoto/lore-fetcher/internal/fetcher"
 	//"github.com/MarceloSpessoto/lore-fetcher/internal/mailer"
 	//"github.com/MarceloSpessoto/lore-fetcher/internal/types"
 	"flag"
@@ -60,8 +60,8 @@ func main(){
 
   switch chosen_option {
     case "fetch":
-    fmt.Println("FETCHING")
-    fmt.Println(*params["mailing_list"])
+    fetcher := fetcher.NewFetcher(*params["mailing_list"], *params["fetch_interval"])
+    fetcher.FetchDaemon()
     case "apply":
     fmt.Println("APPLYING")
     case "send":
