@@ -8,7 +8,6 @@ import (
 	"regexp"
 	"strings"
 	"time"
-  "strconv"
 	"github.com/MarceloSpessoto/lore-fetcher/internal/types"
 	"golang.org/x/text/encoding/ianaindex"
 )
@@ -34,11 +33,9 @@ type Fetcher struct {
   JenkinsToken string
 }
 
-func NewFetcher(mailingList string, fetchInterval string) *Fetcher {
+func NewFetcher() *Fetcher {
   var fetcher Fetcher
   fetcher.patchStatus = make(map[string]bool)
-  fetcher.MailingList = mailingList
-  fetcher.FetchInterval, _ = strconv.Atoi(fetchInterval)
   return &fetcher
 }
 

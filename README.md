@@ -35,7 +35,7 @@ Notice it is also important to provide essential information, such as the mailin
 with additional parameter flags.
 
 ```
-lore-fetcher --fetch --mailing_list=all --fetch_interval=37
+lore-fetcher --fetch --mailing-list=all --fetch-interval=37
 ```
 
 The command above will search for new patches from the `all` mailing list every 37 seconds. 

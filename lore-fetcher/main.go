@@ -4,7 +4,7 @@ import (
 	//"fmt"
 	//"sync"
 
-	//"github.com/MarceloSpessoto/lore-fetcher/internal/configurator"
+	"github.com/MarceloSpessoto/lore-fetcher/internal/configurator"
 	//"github.com/MarceloSpessoto/lore-fetcher/internal/evaluator"
 	"github.com/MarceloSpessoto/lore-fetcher/internal/fetcher"
 	//"github.com/MarceloSpessoto/lore-fetcher/internal/mailer"
@@ -13,30 +13,16 @@ import (
 	"fmt"
 )
 
-//func main(){
-//  var wg sync.WaitGroup
-//  fetcher := fetcher.NewFetcher()
-//  evaluator := evaluator.Evaluator{}
-//  mailer := mailer.Mailer{}
-//  configurator := configurator.Configurator{}
-//  configurator.ParseConfiguration(fetcher, &evaluator, &mailer, "./lore-fetcher")
-//  fmt.Println(fetcher)
-//  fetchBuffer := make(chan types.Patch, 100)
-//  resultBuffer := make(chan types.Patch, 100)
-//  wg.Add(3)
-//  go fetcher.FetchDaemon(fetchBuffer)
-//  go evaluator.ReceivePatches(fetchBuffer, resultBuffer)
-//  go mailer.SendResults(resultBuffer)
-//  wg.Wait()
-//}
-
 func main(){
+
+  var configurator *configurator.Configurator = configurator.NewConfigurator()
+  configurator.ParseConfiguration()
 
   var options = make(map[string]*bool)
   var params = make(map[string]*string)
 
   parseOptions(options)
-  parseParameters(params)
+  parseParameters(params, configurator)
 
   flag.Parse()
 
@@ -60,7 +46,8 @@ func main(){
 
   switch chosen_option {
     case "fetch":
-    fetcher := fetcher.NewFetcher(*params["mailing_list"], *params["fetch_interval"])
+    fetcher := fetcher.NewFetcher()
+    configurator.ConfigureFetch(fetcher)
     fetcher.FetchDaemon()
     case "apply":
     fmt.Println("APPLYING")
@@ -88,11 +75,18 @@ func parseOptions(options map[string]*bool){
   options["help"] = flag.Bool("help", false, "Display basic information about lore fetcher and its possible command options")
 }
 
-func parseParameters(params map[string]*string){
-  params["mailing_list"] = flag.String("mailing_list", "all", "Set the mailing list to be tracked")
-  params["fetch_interval"] = flag.String("fetch_interval", "60", "Interval in seconds between each attempt to find new patches")
+func parseParameters(params map[string]*string, configurator *configurator.Configurator){
+  params["mailing-list"] = flag.String("mailing-list", "", "[Requires --fetch] Set the mailing list to be tracked")
+  params["fetch-interval"] = flag.String("fetch-interval", "", "[Requires --fetch] Interval in seconds between each attempt to find new patches")
 
-  params["from_mail"] = flag.String("from_mail", "", "Mail address that will be used to send test reports")
-  params["to_mail"] = flag.String("to_mail", "", "Mail address where report will be sent")
-  params["password"] = flag.String("auth", "", "authentication string to use 'from_mail'. Required for Gmail addresses, for example")
+  params["from-mail"] = flag.String("from-mail", "", "[Requires --send] Mail address that will be used to send test reports")
+  params["to-mail"] = flag.String("to-mail", "", "[Requires --send] Mail address where report will be sent")
+  params["password"] = flag.String("auth", "", "[Requires --send] authentication string to use 'from_mail'. Required for Gmail addresses, for example")
+  
+  for key, value := range params {
+    if *params[key] == "" {
+      *params[key] = configurator.configuration[key]
+    }
+    fmt.Println(key, ": ", value)
+  }
 }
