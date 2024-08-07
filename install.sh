@@ -1,7 +1,7 @@
 #!/bin/bash
 
 go build lore-fetcher/main.go
-cp lore-fetcher/lore-fetcher /usr/bin/
+cp main /usr/bin/lore-fetcher
 
-mkdir /etc/lore-fetcher
+mkdir -p /etc/lore-fetcher
 cp config.toml /etc/lore-fetcher/lore-fetcher.toml

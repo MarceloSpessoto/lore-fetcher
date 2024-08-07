@@ -1,4 +1,4 @@
-module github.com/MarceloSpessoto/lore-fetcher
+module lore-fetcher
 
 go 1.21
 

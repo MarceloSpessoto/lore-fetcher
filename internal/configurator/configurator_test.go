@@ -3,9 +3,9 @@ package configurator
 import (
 	"testing"
 
-	"github.com/MarceloSpessoto/lore-fetcher/internal/evaluator"
-	"github.com/MarceloSpessoto/lore-fetcher/internal/fetcher"
-	"github.com/MarceloSpessoto/lore-fetcher/internal/mailer"
+	"lore-fetcher/internal/evaluator"
+	"lore-fetcher/internal/fetcher"
+	"lore-fetcher/internal/mailer"
 )
 
 func TestConfigurator(t *testing.T){

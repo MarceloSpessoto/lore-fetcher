@@ -1,7 +1,7 @@
 package evaluator
 
 import(
-  "github.com/MarceloSpessoto/lore-fetcher/internal/types"
+  "lore-fetcher/internal/types"
   "fmt"
   "time"
 )

@@ -8,7 +8,7 @@ import (
 	"regexp"
 	"strings"
 	"time"
-	"github.com/MarceloSpessoto/lore-fetcher/internal/types"
+	"lore-fetcher/internal/types"
 	"golang.org/x/text/encoding/ianaindex"
 )
 

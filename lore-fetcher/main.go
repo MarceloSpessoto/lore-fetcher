@@ -1,14 +1,8 @@
 package main
 
 import (
-	//"fmt"
-	//"sync"
-
-	"github.com/MarceloSpessoto/lore-fetcher/internal/configurator"
-	//"github.com/MarceloSpessoto/lore-fetcher/internal/evaluator"
-	"github.com/MarceloSpessoto/lore-fetcher/internal/fetcher"
-	//"github.com/MarceloSpessoto/lore-fetcher/internal/mailer"
-	//"github.com/MarceloSpessoto/lore-fetcher/internal/types"
+	"lore-fetcher/internal/configurator"
+	"lore-fetcher/internal/fetcher"
 	"flag"
 	"fmt"
 )
@@ -22,9 +16,15 @@ func main(){
   var params = make(map[string]*string)
 
   parseOptions(options)
-  parseParameters(params, configurator)
+  parseParameters(params)
 
   flag.Parse()
+
+  for key, value := range params {
+    if *params[key] != "" {
+      configurator.SetConfiguration(key, *value)
+    }
+  }
 
   var chosen_option string = ""
   for key, value := range options {
@@ -54,7 +54,7 @@ func main(){
     case "send":
     fmt.Println("SENDING")
     case "help":
-    fmt.Println("HELPING")
+    displayHelp()
   }
 
 }
@@ -75,18 +75,11 @@ func parseOptions(options map[string]*bool){
   options["help"] = flag.Bool("help", false, "Display basic information about lore fetcher and its possible command options")
 }
 
-func parseParameters(params map[string]*string, configurator *configurator.Configurator){
+func parseParameters(params map[string]*string){
   params["mailing-list"] = flag.String("mailing-list", "", "[Requires --fetch] Set the mailing list to be tracked")
   params["fetch-interval"] = flag.String("fetch-interval", "", "[Requires --fetch] Interval in seconds between each attempt to find new patches")
 
   params["from-mail"] = flag.String("from-mail", "", "[Requires --send] Mail address that will be used to send test reports")
   params["to-mail"] = flag.String("to-mail", "", "[Requires --send] Mail address where report will be sent")
   params["password"] = flag.String("auth", "", "[Requires --send] authentication string to use 'from_mail'. Required for Gmail addresses, for example")
-  
-  for key, value := range params {
-    if *params[key] == "" {
-      *params[key] = configurator.configuration[key]
-    }
-    fmt.Println(key, ": ", value)
-  }
 }

@@ -1,8 +1,8 @@
 [ fetcher ]
-mailing_list = ""
-fetch_interval = 
+mailing-list = ""
+fetch-interval = 0
 
 [ mailer ]
-from_mail = ""
-to_mail = ""
+from-mail = ""
+to-mail = ""
 password = ""

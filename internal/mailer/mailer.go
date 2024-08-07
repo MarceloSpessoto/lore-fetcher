@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/smtp"
 	"time"
-	"github.com/MarceloSpessoto/lore-fetcher/internal/types"
+	"lore-fetcher/internal/types"
 )
 
 type Mailer struct {

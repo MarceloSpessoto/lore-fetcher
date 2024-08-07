@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"strconv"
 
-  "github.com/MarceloSpessoto/lore-fetcher/internal/fetcher"
+	"lore-fetcher/internal/fetcher"
+
 	"github.com/spf13/viper"
 )
 
@@ -29,9 +30,21 @@ func (configurator *Configurator) ParseConfiguration(){
   configurator.configuration["mailing-list"] = viper.GetString("fetcher.mailing-list")
   configurator.configuration["fetch-interval"] = strconv.Itoa(viper.GetInt("fetcher.fetch-interval"))
 
-  configurator.configuration["from-mail"] = viper.GetString("mailer.from_mail")
-  configurator.configuration["to-mail"] = viper.GetString("mailer.to_mail")
+  configurator.configuration["from-mail"] = viper.GetString("mailer.from-mail")
+  configurator.configuration["to-mail"] = viper.GetString("mailer.to-mail")
   configurator.configuration["password"] = viper.GetString("mailer.password")
+}
+
+func (configurator *Configurator) IsConfigurated(key string) bool{
+  return configurator.configuration[key] != ""
+}
+
+func (configurator *Configurator) GetConfiguration(key string) string{
+  return configurator.configuration[key]
+}
+
+func (configurator *Configurator) SetConfiguration(key string, value string) {
+  configurator.configuration[key] = value
 }
 
 func (configurator *Configurator) ConfigureFetch(fetcher *fetcher.Fetcher){
