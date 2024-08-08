@@ -1,0 +1,11 @@
+[ fetcher ]
+mailing-list = "all"
+fetch-interval = 30
+jenkins-server = "jenkins:8080"
+jenkins-pipeline = "kernel-compilation"
+jenkins-token = "token"
+
+[ mailer ]
+from-mail = ""
+to-mail = ""
+password = ""
