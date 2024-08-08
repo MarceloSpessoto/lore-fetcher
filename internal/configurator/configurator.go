@@ -29,6 +29,9 @@ func (configurator *Configurator) ParseConfiguration(){
 
   configurator.configuration["mailing-list"] = viper.GetString("fetcher.mailing-list")
   configurator.configuration["fetch-interval"] = strconv.Itoa(viper.GetInt("fetcher.fetch-interval"))
+  configurator.configuration["jenkins-server"] = viper.GetString("fetcher.jenkins-server")
+  configurator.configuration["jenkins-token"] = viper.GetString("fetcher.jenkins-token")
+  configurator.configuration["jenkins-pipeline"] = viper.GetString("fetcher.jenkins-pipeline")
 
   configurator.configuration["from-mail"] = viper.GetString("mailer.from-mail")
   configurator.configuration["to-mail"] = viper.GetString("mailer.to-mail")
@@ -49,5 +52,8 @@ func (configurator *Configurator) SetConfiguration(key string, value string) {
 
 func (configurator *Configurator) ConfigureFetch(fetcher *fetcher.Fetcher){
   fetcher.MailingList = configurator.configuration["mailing-list"]
-  fetcher.FetchInterval, _ = strconv.Atoi(configurator.configuration["mailing-list"])
+  fetcher.FetchInterval, _ = strconv.Atoi(configurator.configuration["fetch-interval"])
+  fetcher.JenkinsServer = configurator.configuration["jenkins-server"]
+  fetcher.JenkinsPipeline = configurator.configuration["jenkins-pipeline"]
+  fetcher.JenkinsToken = configurator.configuration["jenkins-token"]
 }

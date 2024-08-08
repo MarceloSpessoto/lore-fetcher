@@ -78,6 +78,9 @@ func parseOptions(options map[string]*bool){
 func parseParameters(params map[string]*string){
   params["mailing-list"] = flag.String("mailing-list", "", "[Requires --fetch] Set the mailing list to be tracked")
   params["fetch-interval"] = flag.String("fetch-interval", "", "[Requires --fetch] Interval in seconds between each attempt to find new patches")
+  params["jenkins-server"] = flag.String("jenkins-server", "", "[Requires --fetch] Server URL (<jenkins-address>:<port>)")
+  params["jenkins-pipeline"] = flag.String("jenkins-pipeline", "", "[Requires --fetch] The name of the Jenkins pipeline to trigger")
+  params["jenkins-token"] = flag.String("jenkins-token", "", "[Requires --fetch] The name of the Jenkins auth token to trigger pipeline")
 
   params["from-mail"] = flag.String("from-mail", "", "[Requires --send] Mail address that will be used to send test reports")
   params["to-mail"] = flag.String("to-mail", "", "[Requires --send] Mail address where report will be sent")

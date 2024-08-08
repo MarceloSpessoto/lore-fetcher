@@ -10,6 +10,7 @@ import (
 	"time"
 	"lore-fetcher/internal/types"
 	"golang.org/x/text/encoding/ianaindex"
+  "os/exec"
 )
 
 type Feed struct {
@@ -116,7 +117,16 @@ func (fetcher *Fetcher) processPatches(){
       patch.PatchHref = patchHref
       patch.PatchTag = patchTag
       fetcher.patchStatus[patchTag] = true
-      fmt.Println("[", time.Now(), "]: Sending patch '", patch.Title, "' to CI Pipeline")
+      if isPatch(patch.Title){
+        fmt.Println("[", time.Now(), "]: Sending patch '", patch.Title, "' to CI Pipeline")
+        url := fmt.Sprintf("%s/job/%s/buildWithParameters?token=%s&PATCH=%s", fetcher.JenkinsServer, fetcher.JenkinsPipeline, fetcher.JenkinsToken, patch.PatchHref)
+        fmt.Println(url)
+        cmd := exec.Command("curl", url)
+        err := cmd.Run()
+        if err != nil {
+          fmt.Println(err)
+        }
+      }
     } else {
       break
     }
