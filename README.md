@@ -45,3 +45,14 @@ More details about `lore-fetcher`, its use cases, and proper configuration can b
 You can also try a basic Jenkins CI infrastructure integrated with `lore-fetcher` by running the `jenkins-sample` docker-compose
 environment with a single `docker-compose up` command. Check `jenkins-sample/README.md` for more information about
 how it is configured and how `lore-fetcher` is used to aid the automation of such infrastructure.
+
+## The Jenkins sample
+
+As mentioned above, there is a Jenkins `docker-compose` environment running a simple jenkins server environment
+attached to a `lore-fetcher` instance, receiving new patches and testing a simple `tinyconfig` compilation.
+
+Change to directory `jenkins-sample` and run `docker-compose up -d`, and it is as simple as that. There
+will be a container running the `lore-fetcher` application and sending triggers to a Jenkins container.
+
+You can access the Jenkins server Web GUI with any browser on `localhost:8080`, and log in with the 
+`admin` user with password `admin`.
