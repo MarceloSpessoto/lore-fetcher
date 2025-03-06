@@ -1,8 +1,0 @@
-[ fetcher ]
-mailing_list = "mock_mailing_list"
-fetch_interval = 120
-
-[ mailer ]
-from_mail = "mock_sender"
-to_mail = "mock_receiver"
-password = "mock_password"

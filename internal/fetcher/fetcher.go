@@ -53,7 +53,7 @@ func (fetcher *Fetcher) FetchDaemon(){
       time.Sleep(20 * time.Second)
       continue
     }
-    fmt.Println("Most recent patch from ", fetcher.MailingList, ":\n", fetcher.feed.Entries[0].Title)
+    fmt.Println("Most recent patch from all:\n", fetcher.feed.Entries[0].Title)
     firstPatchHref := fetcher.feed.Entries[0].Link.Href
     patchTag := parsePatchTag(firstPatchHref)
     fetcher.patchStatus[patchTag] = true
@@ -63,7 +63,7 @@ func (fetcher *Fetcher) FetchDaemon(){
   for {
     time.Sleep(30 * time.Second)
 
-    fmt.Println("[", time.Now(), "]: Searching for new patches in", fetcher.MailingList)
+    fmt.Println("[", time.Now(), "]: Searching for new patches in all")
     fetcher.GetPatches()
     fetcher.processPatches()
   }
@@ -75,7 +75,7 @@ func (fetcher *Fetcher) FetchBatch(){
 }
 
 func (fetcher *Fetcher) GetPatches() {
-  var fetchUrl string = fmt.Sprintf("https://lore.kernel.org/%s/?q=rt:..+AND+NOT+s:Re&x=A", fetcher.MailingList)
+  var fetchUrl string = "https://lore.kernel.org/all/?q=rt:..+AND+NOT+s:Re&x=A"
   resp, err := http.Get(fetchUrl)
   if err != nil {
     fmt.Println(err)
@@ -118,14 +118,7 @@ func (fetcher *Fetcher) processPatches(){
       patch.PatchTag = patchTag
       fetcher.patchStatus[patchTag] = true
       if isPatch(patch.Title){
-        fmt.Println("[", time.Now(), "]: Sending patch '", patch.Title, "' to CI Pipeline")
-        url := fmt.Sprintf("%s/job/%s/buildWithParameters?token=%s&PATCH=%s", fetcher.JenkinsServer, fetcher.JenkinsPipeline, fetcher.JenkinsToken, patch.PatchHref)
-        fmt.Println(url)
-        cmd := exec.Command("curl", url)
-        err := cmd.Run()
-        if err != nil {
-          fmt.Println(err)
-        }
+        fmt.Println("IS PATCH")
       }
     } else {
       break
