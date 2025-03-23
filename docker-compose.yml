@@ -1,0 +1,18 @@
+services:
+  lore-fetcher:
+    build: lore-fetcher
+    depends_on:
+      database:
+        condition: service_healthy
+    network_mode: "host"
+  database:
+    image: postgres
+    network_mode: "host"
+    environment:
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: lore-fetcher
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 30s
+      retries: 6
