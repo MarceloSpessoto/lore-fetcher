@@ -1,6 +1,6 @@
 package handler
 
-import (
+/* import (
   "lore-fetcher/internal/core/domain"
   "lore-fetcher/internal/core/services"
   "net/http"
@@ -35,4 +35,4 @@ func (h *HTTPHandler) ReadPatches(c *gin.Context) {
     return
   }
   c.JSON(http.StatusOK, gin.H{"data": patches})
-}
+} */

@@ -1,31 +1,25 @@
 package main
 
 import (
-  "lore-fetcher/internal/adapters/handler"
-  "lore-fetcher/internal/adapters/repository"
-  "lore-fetcher/internal/core/services"
-  "github.com/gin-gonic/gin"
+	"lore-fetcher/internal/adapters/repository/database/postgres"
+	"lore-fetcher/internal/adapters/repository/patchArchive/lore"
+  "lore-fetcher/internal/core/services/database"
+	"lore-fetcher/internal/core/services/patchArchive"
   "lore-fetcher/internal/fetcher"
+	"time"
 )
 
 var (
-  httpHandler *handler.HTTPHandler
-  service *services.LFService
+  loreService *patchArchive.PatchArchiveService
+	postgresService *database.DatabaseService
 )
 
 func main(){
-  store := repository.NewLFPostgresRepository()
-  service = services.NewLFService(store)
-  fetcher := fetcher.NewFetcher(*service)
+  postgresRepository := postgres.NewPostgresRepository()
+	postgresService = database.NewDatabaseService(postgresRepository)
+	loreRepository := lore.NewLoreRepository()
+	loreService = patchArchive.NewPatchArchiveService(loreRepository)
+	fetcher := fetcher.NewFetcher(*loreService, *postgresService)
   go fetcher.FetchDaemon()
-
-  InitRoutes()
-}
-
-func InitRoutes (){
-  router := gin.Default()
-  handler := handler.NewHTTPHandler(*service)
-  router.GET("/patches", handler.ReadPatches)
-  router.POST("/patches", handler.SavePatch)
-  router.Run(":8080")
+	time.Sleep(1000 * time.Second)
 }
