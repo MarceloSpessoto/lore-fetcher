@@ -43,3 +43,34 @@ func (lf *PostgresRepository) ReadPatches() ([]*domain.Patch, error) {
   }
   return patches, nil
 }
+
+func (lf *PostgresRepository) ReadPatch(id string) (*domain.Patch, error) {
+	var patch domain.Patch
+	if err := lf.db.Where("id = ?", id).First(&patch).Error; err != nil {
+		return nil, err
+	}
+	return &patch, nil
+}
+
+func (lf *PostgresRepository) SaveJob(job domain.Job) error {
+	if err := lf.db.Create(&job).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func (lf *PostgresRepository) ReadJobs() ([]*domain.Job, error) {
+	var jobs []*domain.Job
+	if err := lf.db.Find(&jobs).Error; err != nil {
+		return nil, err
+	}
+	return jobs, nil
+}
+
+func (lf *PostgresRepository) ReadJob(id string) (*domain.Job, error) {
+	var job domain.Job
+	if err := lf.db.Where("id = ?", id).First(&job).Error; err != nil {
+		return nil, err
+	}
+	return &job, nil
+}

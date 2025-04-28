@@ -23,3 +23,20 @@ func (svc *DatabaseService) SavePatch(patch domain.Patch) error {
 func (svc *DatabaseService) ReadPatches() ([]*domain.Patch, error) {
   return svc.repo.ReadPatches()
 }
+
+func (svc *DatabaseService) ReadPatch(id string) (*domain.Patch, error) {
+	return svc.repo.ReadPatch(id)
+}
+
+func (svc *DatabaseService) SaveJob(job domain.Job) error {
+	job.ID = uuid.New().String()
+	return svc.repo.SaveJob(job)
+}
+
+func (svc *DatabaseService) ReadJobs() ([]*domain.Job, error) {
+	return svc.repo.ReadJobs()
+}
+
+func (svc *DatabaseService) ReadJob(id string) (*domain.Job, error) {
+	return svc.repo.ReadJob(id)
+}

@@ -3,6 +3,7 @@ package tui
 import (
 	"github.com/rivo/tview"
 	"lore-fetcher/cmd/ui/tui/patchesPage"
+	"lore-fetcher/cmd/ui/tui/jobsPage"
 	"lore-fetcher/internal/core/services/database"
 	"lore-fetcher/cmd/ui/tui/tuiHelpers"
 )
@@ -16,7 +17,9 @@ func RenderTuiMenu(dbsvc database.DatabaseService) {
 		AddItem("List patch history", "see the latest patches from the selected mailing list", '0', func() {
 			patchesPage.GetPatchesPage(dbsvc, pages, app, list)
 		}).
-		AddItem("List job history", "see the latest CI jobs that were triggered", '1', nil).
+		AddItem("List job history", "see the latest CI jobs that were triggered", '1', func () {
+			jobsPage.GetJobsPage(dbsvc, pages, app, list)
+		}).
 		AddItem("Quit", "Quit the app", 'q', func() {
 			app.Stop()
 		})
