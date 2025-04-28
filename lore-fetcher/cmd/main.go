@@ -6,7 +6,7 @@ import (
   "lore-fetcher/internal/core/services/database"
 	"lore-fetcher/internal/core/services/patchArchive"
   "lore-fetcher/internal/fetcher"
-	"time"
+	"lore-fetcher/cmd/ui/tui"
 )
 
 var (
@@ -21,5 +21,5 @@ func main(){
 	loreService = patchArchive.NewPatchArchiveService(loreRepository)
 	fetcher := fetcher.NewFetcher(*loreService, *postgresService)
   go fetcher.FetchDaemon()
-	time.Sleep(1000 * time.Second)
+	tui.RenderTuiMenu(*postgresService)
 }
