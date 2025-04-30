@@ -6,6 +6,7 @@ import (
 	"github.com/gdamore/tcell/v2"
 	"lore-fetcher/internal/core/services/database"
 	"lore-fetcher/cmd/ui/tui/tuiHelpers"
+	"lore-fetcher/internal/jobManager"
 )
 
 func GetPatchesPage(dbsvc database.DatabaseService, pages *tview.Pages, app *tview.Application, menu *tview.List) {
@@ -13,7 +14,11 @@ func GetPatchesPage(dbsvc database.DatabaseService, pages *tview.Pages, app *tvi
 		SetFixed(1, 0).
 		SetSeparator(tview.BoxDrawingsLightHorizontal).
 		SetBordersColor(tcell.ColorYellow).
-		SetSelectable(true, false)
+		SetSelectable(true, false).
+		SetSelectedFunc(func(r, c int) {
+			patches, _ := dbsvc.ReadPatches()
+			jobManager.MockedJobPipeline(dbsvc, *patches[r])
+		})
 	frame := tview.NewFrame(table).
 		SetBorders(0, 0, 0, 0, 0, 0)
 	frame.SetBorder(true).

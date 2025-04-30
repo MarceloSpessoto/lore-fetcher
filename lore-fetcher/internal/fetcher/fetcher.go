@@ -7,6 +7,7 @@ import (
   "lore-fetcher/internal/core/services/patchArchive"
 	"lore-fetcher/internal/core/services/database"
   "lore-fetcher/internal/core/domain"
+	"lore-fetcher/internal/jobManager"
 )
 
 type Fetcher struct {
@@ -32,7 +33,8 @@ func (fetcher *Fetcher) FetchDaemon(){
     }
 		patch := patches[0]
     fmt.Println("Most recent patch from all:\n", patch.Title)
-    fetcher.databaseService.SavePatch(patch)
+		fetcher.databaseService.SavePatch(&patch)
+		jobManager.MockedJobPipeline(fetcher.databaseService, patch)
     fmt.Println("New patch found: ", patch.Title)
 		fetcher.lastHref = patch.PatchHref
     break
@@ -53,7 +55,7 @@ func (fetcher *Fetcher) processPatches(patches []domain.Patch) {
 
 		if patch.PatchHref != fetcher.lastHref {
       if isPatch(patch.Title){
-        fetcher.databaseService.SavePatch(patch)
+        fetcher.databaseService.SavePatch(&patch)
         fmt.Println("New patch found: ", patch.Title)
       }
     } else {

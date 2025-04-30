@@ -15,7 +15,7 @@ func NewDatabaseService(repo database.DatabaseRepository) *DatabaseService {
   }
 }
 
-func (svc *DatabaseService) SavePatch(patch domain.Patch) error {
+func (svc *DatabaseService) SavePatch(patch *domain.Patch) error {
   patch.ID = uuid.New().String()
   return svc.repo.SavePatch(patch)
 }
@@ -28,7 +28,7 @@ func (svc *DatabaseService) ReadPatch(id string) (*domain.Patch, error) {
 	return svc.repo.ReadPatch(id)
 }
 
-func (svc *DatabaseService) SaveJob(job domain.Job) error {
+func (svc *DatabaseService) SaveJob(job *domain.Job) error {
 	job.ID = uuid.New().String()
 	return svc.repo.SaveJob(job)
 }

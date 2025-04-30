@@ -25,11 +25,12 @@ func NewPostgresRepository() *PostgresRepository {
     panic(err)
   }
 
+	db.AutoMigrate(&domain.Job{})
   db.AutoMigrate(&domain.Patch{})
   return &PostgresRepository{db}
 }
 
-func (lf *PostgresRepository) SavePatch(patch domain.Patch) error {
+func (lf *PostgresRepository) SavePatch(patch *domain.Patch) error {
   if err := lf.db.Create(&patch).Error; err != nil {
     return err
   }
@@ -52,7 +53,7 @@ func (lf *PostgresRepository) ReadPatch(id string) (*domain.Patch, error) {
 	return &patch, nil
 }
 
-func (lf *PostgresRepository) SaveJob(job domain.Job) error {
+func (lf *PostgresRepository) SaveJob(job *domain.Job) error {
 	if err := lf.db.Create(&job).Error; err != nil {
 		return err
 	}
