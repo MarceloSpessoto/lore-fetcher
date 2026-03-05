@@ -1,6 +1,8 @@
 package main
 
 import (
+	"log"
+	"github.com/joho/godotenv"
 	"lore-fetcher/internal/adapters/repository/database/postgres"
 	"lore-fetcher/internal/adapters/repository/patchArchive/lore"
 	gitlabCIRepo "lore-fetcher/internal/adapters/repository/gitlabCI"
@@ -17,6 +19,9 @@ var (
 )
 
 func main() {
+	if err := godotenv.Load(); err != nil {
+		log.Println("No .env file found, using environment variables")
+	}
 	postgresRepository := postgres.NewPostgresRepository()
 	postgresService = database.NewDatabaseService(postgresRepository)
 	loreRepository := lore.NewLoreRepository()
