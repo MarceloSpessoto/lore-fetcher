@@ -3,6 +3,7 @@ import (
 	"io"
 	"encoding/xml"
 	"net/http"
+	"os"
 	"lore-fetcher/internal/core/domain"
 	"golang.org/x/text/encoding/ianaindex"
 	"fmt"
@@ -17,18 +18,23 @@ type Feed struct {
       Href string `xml:"href,attr"`
     } `xml:"link"`
   } `xml:"entry"`
-} 
+}
 
 type LoreRepository struct {
-	feed Feed
+	feed       Feed
+	subsystem  string
 }
 
 func NewLoreRepository() *LoreRepository {
-	return &LoreRepository{}
+	subsystem := os.Getenv("LORE_SUBSYSTEM")
+	if subsystem == "" {
+		subsystem = "all"
+	}
+	return &LoreRepository{subsystem: subsystem}
 }
 
 func (lr *LoreRepository) GetRecentPatches() []domain.Patch {
-	fetchUrl := "https://lore.kernel.org/all/?q=rt:..+AND+NOT+s:Re&x=A"
+	fetchUrl := fmt.Sprintf("https://lore.kernel.org/%s/?q=rt:..+AND+NOT+s:Re&x=A", lr.subsystem)
 	resp, err := http.Get(fetchUrl)
 	if err != nil {
 		fmt.Println(err)

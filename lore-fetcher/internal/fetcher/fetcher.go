@@ -4,23 +4,26 @@ import (
 	"fmt"
 	"regexp"
 	"time"
-  "lore-fetcher/internal/core/services/patchArchive"
+	"lore-fetcher/internal/core/services/patchArchive"
 	"lore-fetcher/internal/core/services/database"
-  "lore-fetcher/internal/core/domain"
+	"lore-fetcher/internal/core/services/gitlabCI"
+	"lore-fetcher/internal/core/domain"
 	"lore-fetcher/internal/jobManager"
 )
 
 type Fetcher struct {
-	lastHref string
-  patchArchiveService patchArchive.PatchArchiveService
-	databaseService database.DatabaseService
+	lastHref            string
+	patchArchiveService patchArchive.PatchArchiveService
+	databaseService     database.DatabaseService
+	gitlabCIService     *gitlabCI.GitlabCIService
 }
 
-func NewFetcher(pasvc patchArchive.PatchArchiveService, dbsvc database.DatabaseService) *Fetcher {
-  var fetcher Fetcher
+func NewFetcher(pasvc patchArchive.PatchArchiveService, dbsvc database.DatabaseService, glsvc *gitlabCI.GitlabCIService) *Fetcher {
+	var fetcher Fetcher
 	fetcher.patchArchiveService = pasvc
 	fetcher.databaseService = dbsvc
-  return &fetcher
+	fetcher.gitlabCIService = glsvc
+	return &fetcher
 }
 
 func (fetcher *Fetcher) FetchDaemon(){
@@ -35,7 +38,10 @@ func (fetcher *Fetcher) FetchDaemon(){
     fmt.Println("Most recent patch from all:\n", patch.Title)
 		fetcher.databaseService.SavePatch(&patch)
 		jobManager.MockedJobPipeline(fetcher.databaseService, patch)
-    fmt.Println("New patch found: ", patch.Title)
+		if err := fetcher.gitlabCIService.TriggerPipeline(patch.PatchHref); err != nil {
+			fmt.Println("Failed to trigger GitLab CI pipeline:", err)
+		}
+		fmt.Println("New patch found: ", patch.Title)
 		fetcher.lastHref = patch.PatchHref
     break
   }
@@ -54,11 +60,14 @@ func (fetcher *Fetcher) processPatches(patches []domain.Patch) {
 		patch := patches[i]
 
 		if patch.PatchHref != fetcher.lastHref {
-      if isPatch(patch.Title){
-        fetcher.databaseService.SavePatch(&patch)
-        fmt.Println("New patch found: ", patch.Title)
-      }
-    } else {
+			if isPatch(patch.Title) {
+				fetcher.databaseService.SavePatch(&patch)
+				if err := fetcher.gitlabCIService.TriggerPipeline(patch.PatchHref); err != nil {
+					fmt.Println("Failed to trigger GitLab CI pipeline:", err)
+				}
+				fmt.Println("New patch found: ", patch.Title)
+			}
+		} else {
 			fetcher.lastHref = patches[0].PatchHref
       break
     }
