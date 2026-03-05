@@ -1,7 +1,7 @@
 package fetcher
 
 import (
-	"fmt"
+	"log"
 	"regexp"
 	"time"
 	"lore-fetcher/internal/core/services/patchArchive"
@@ -26,58 +26,56 @@ func NewFetcher(pasvc patchArchive.PatchArchiveService, dbsvc database.DatabaseS
 	return &fetcher
 }
 
-func (fetcher *Fetcher) FetchDaemon(){
-	fmt.Println("Starting fetcher daemon...")
-  for {
+func (fetcher *Fetcher) FetchDaemon() {
+	log.Println("Starting fetcher daemon...")
+	for {
 		patches := fetcher.patchArchiveService.GetRecentPatches()
-    if len(patches) == 0 {
-      time.Sleep(20 * time.Second)
-      continue
-    }
+		if len(patches) == 0 {
+			time.Sleep(20 * time.Second)
+			continue
+		}
 		patch := patches[0]
-    fmt.Println("Most recent patch from all:\n", patch.Title)
+		log.Println("Most recent patch:", patch.Title)
 		fetcher.databaseService.SavePatch(&patch)
 		jobManager.MockedJobPipeline(fetcher.databaseService, patch)
 		if err := fetcher.gitlabCIService.TriggerPipeline(patch.PatchHref); err != nil {
-			fmt.Println("Failed to trigger GitLab CI pipeline:", err)
+			log.Println("Failed to trigger GitLab CI pipeline:", err)
 		}
-		fmt.Println("New patch found: ", patch.Title)
+		log.Println("New patch found:", patch.Title)
 		fetcher.lastHref = patch.PatchHref
-    break
-  }
+		break
+	}
 
-  for {
-    time.Sleep(30 * time.Second)
-
-    fmt.Println("[", time.Now(), "]: Searching for new patches in all")
+	for {
+		time.Sleep(30 * time.Second)
+		log.Println("Searching for new patches...")
 		patches := fetcher.patchArchiveService.GetRecentPatches()
-    fetcher.processPatches(patches)
-  }
+		fetcher.processPatches(patches)
+	}
 }
 
 func (fetcher *Fetcher) processPatches(patches []domain.Patch) {
-  for i := 0; i < len(patches); i++ {
+	for i := 0; i < len(patches); i++ {
 		patch := patches[i]
-
 		if patch.PatchHref != fetcher.lastHref {
 			if isPatch(patch.Title) {
 				fetcher.databaseService.SavePatch(&patch)
 				if err := fetcher.gitlabCIService.TriggerPipeline(patch.PatchHref); err != nil {
-					fmt.Println("Failed to trigger GitLab CI pipeline:", err)
+					log.Println("Failed to trigger GitLab CI pipeline:", err)
 				}
-				fmt.Println("New patch found: ", patch.Title)
+				log.Println("New patch found:", patch.Title)
 			}
 		} else {
 			fetcher.lastHref = patches[0].PatchHref
-      break
-    }
-  }
+			break
+		}
+	}
 }
 
 // A temporary method to assert we're fetching a Patch message:
 // checking if the title string contains the [PATCH] tag
 func isPatch(patchTitle string) bool {
-  fmt.Println(patchTitle)
-  hasPattern, _ := regexp.Match(`.*\[.*PATCH.*\].*`, []byte(patchTitle))
-  return hasPattern
+	log.Println("Checking patch title:", patchTitle)
+	hasPattern, _ := regexp.Match(`.*\[.*PATCH.*\].*`, []byte(patchTitle))
+	return hasPattern
 }

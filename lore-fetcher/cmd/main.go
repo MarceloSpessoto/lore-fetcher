@@ -2,14 +2,16 @@ package main
 
 import (
 	"log"
+
 	"github.com/joho/godotenv"
+	gitlabCIRepo "lore-fetcher/internal/adapters/repository/gitlabCI"
 	"lore-fetcher/internal/adapters/repository/database/postgres"
 	"lore-fetcher/internal/adapters/repository/patchArchive/lore"
-	gitlabCIRepo "lore-fetcher/internal/adapters/repository/gitlabCI"
 	"lore-fetcher/internal/core/services/database"
-	"lore-fetcher/internal/core/services/patchArchive"
 	"lore-fetcher/internal/core/services/gitlabCI"
+	"lore-fetcher/internal/core/services/patchArchive"
 	"lore-fetcher/internal/fetcher"
+	"lore-fetcher/internal/logger"
 	"lore-fetcher/cmd/ui/tui"
 )
 
@@ -22,6 +24,11 @@ func main() {
 	if err := godotenv.Load(); err != nil {
 		log.Println("No .env file found, using environment variables")
 	}
+
+	lg := logger.New()
+	log.SetOutput(lg)
+	log.SetFlags(log.Ldate | log.Ltime)
+
 	postgresRepository := postgres.NewPostgresRepository()
 	postgresService = database.NewDatabaseService(postgresRepository)
 	loreRepository := lore.NewLoreRepository()
@@ -30,5 +37,5 @@ func main() {
 	gitlabCIService := gitlabCI.NewGitlabCIService(gitlabCIRepository)
 	fetcher := fetcher.NewFetcher(*loreService, *postgresService, gitlabCIService)
 	go fetcher.FetchDaemon()
-	tui.RenderTuiMenu(*postgresService)
+	tui.RenderTuiMenu(*postgresService, lg)
 }
