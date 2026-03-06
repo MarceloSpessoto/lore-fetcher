@@ -3,6 +3,7 @@ package fetcher
 import (
 	"log"
 	"regexp"
+	"strconv"
 	"time"
 	"lore-fetcher/internal/core/services/patchArchive"
 	"lore-fetcher/internal/core/services/database"
@@ -55,27 +56,66 @@ func (fetcher *Fetcher) FetchDaemon() {
 }
 
 func (fetcher *Fetcher) processPatches(patches []domain.Patch) {
+	// Collect new patches (up to lastHref)
+	var newPatches []domain.Patch
 	for i := 0; i < len(patches); i++ {
-		patch := patches[i]
-		if patch.PatchHref != fetcher.lastHref {
-			if isPatch(patch.Title) {
-				fetcher.databaseService.SavePatch(&patch)
-				if err := fetcher.gitlabCIService.TriggerPipeline(patch.PatchHref); err != nil {
-					log.Println("Failed to trigger GitLab CI pipeline:", err)
-				}
-				log.Println("New patch found:", patch.Title)
-			}
-		} else {
-			fetcher.lastHref = patches[0].PatchHref
+		if patches[i].PatchHref == fetcher.lastHref {
 			break
 		}
+		if isPatch(patches[i].Title) {
+			newPatches = append(newPatches, patches[i])
+		}
 	}
+	if len(newPatches) == 0 {
+		if len(patches) > 0 {
+			fetcher.lastHref = patches[0].PatchHref
+		}
+		return
+	}
+
+	// Find which series totals have a cover letter (index 0) present
+	seriesWithCoverLetter := map[int]bool{}
+	for _, p := range newPatches {
+		idx, total := parsePatchSeriesIndex(p.Title)
+		if idx == 0 && total > 0 {
+			seriesWithCoverLetter[total] = true
+		}
+	}
+
+	for _, patch := range newPatches {
+		idx, total := parsePatchSeriesIndex(patch.Title)
+		if total > 1 && idx > 0 {
+			// Part of a multi-patch series; skip unless it's the first patch
+			// and no cover letter exists for this series size.
+			if !(idx == 1 && !seriesWithCoverLetter[total]) {
+				continue
+			}
+		}
+		fetcher.databaseService.SavePatch(&patch)
+		if err := fetcher.gitlabCIService.TriggerPipeline(patch.PatchHref); err != nil {
+			log.Println("Failed to trigger GitLab CI pipeline:", err)
+		}
+		log.Println("New patch found:", patch.Title)
+	}
+
+	fetcher.lastHref = patches[0].PatchHref
 }
 
-// A temporary method to assert we're fetching a Patch message:
-// checking if the title string contains the [PATCH] tag
+// isPatch checks if the title contains the [PATCH] tag.
 func isPatch(patchTitle string) bool {
-	log.Println("Checking patch title:", patchTitle)
-	hasPattern, _ := regexp.Match(`.*\[.*PATCH.*\].*`, []byte(patchTitle))
+	hasPattern, _ := regexp.MatchString(`\[.*PATCH.*\]`, patchTitle)
 	return hasPattern
+}
+
+// parsePatchSeriesIndex extracts (index, total) from a [PATCH X/N] subject.
+// Returns (-1, -1) if not a numbered series.
+func parsePatchSeriesIndex(title string) (int, int) {
+	re := regexp.MustCompile(`\[.*?PATCH\s+(\d+)/(\d+).*?\]`)
+	m := re.FindStringSubmatch(title)
+	if m == nil {
+		return -1, -1
+	}
+	idx, _ := strconv.Atoi(m[1])
+	total, _ := strconv.Atoi(m[2])
+	return idx, total
 }
