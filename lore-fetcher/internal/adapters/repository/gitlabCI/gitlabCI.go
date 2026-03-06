@@ -2,6 +2,7 @@ package gitlabCI
 
 import (
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"os"
@@ -38,7 +39,8 @@ func (r *GitlabCIRepository) TriggerPipeline(patch string) error {
 	defer resp.Body.Close()
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return fmt.Errorf("gitlab CI trigger returned status %d", resp.StatusCode)
+		body, _ := io.ReadAll(resp.Body)
+		return fmt.Errorf("gitlab CI trigger returned status %d: %s", resp.StatusCode, string(body))
 	}
 
 	return nil
