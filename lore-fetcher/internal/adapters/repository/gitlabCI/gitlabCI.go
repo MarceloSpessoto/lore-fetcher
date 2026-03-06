@@ -23,13 +23,13 @@ func NewGitlabCIRepository() *GitlabCIRepository {
 	}
 }
 
-func (r *GitlabCIRepository) TriggerPipeline(patchURL string) error {
+func (r *GitlabCIRepository) TriggerPipeline(patch string) error {
 	endpoint := fmt.Sprintf("%s/api/v4/projects/%s/trigger/pipeline", r.instanceURL, r.projectID)
 
 	formData := url.Values{}
 	formData.Set("token", r.triggerToken)
 	formData.Set("ref", r.ref)
-	formData.Set("variables[PATCH_URL]", patchURL)
+	formData.Set("variables[PATCH]", patch)
 
 	resp, err := http.PostForm(endpoint, formData)
 	if err != nil {
