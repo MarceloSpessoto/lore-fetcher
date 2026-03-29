@@ -3,6 +3,8 @@ package main
 import (
 	"log"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/joho/godotenv"
 	gitlabCIRepo "lore-fetcher/internal/adapters/repository/gitlabCI"
@@ -28,7 +30,12 @@ func main() {
 		log.Println("No .env file found, using environment variables")
 	}
 
-	lg := logger.New()
+	var lg *logger.Logger
+	if os.Getenv("DAEMON") == "true" {
+		lg = logger.NewWithStdout()
+	} else {
+		lg = logger.New()
+	}
 	log.SetOutput(lg)
 	log.SetFlags(log.Ldate | log.Ltime)
 
@@ -50,5 +57,15 @@ func main() {
 	gitlabCIService := gitlabCI.NewGitlabCIService(gitlabCIRepository)
 	fetcher := fetcher.NewFetcher(*patchService, *postgresService, gitlabCIService)
 	go fetcher.FetchDaemon()
+
+	if os.Getenv("DAEMON") == "true" {
+		log.Println("Running in daemon mode")
+		sig := make(chan os.Signal, 1)
+		signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
+		<-sig
+		log.Println("Shutting down")
+		return
+	}
+
 	tui.RenderTuiMenu(*postgresService, lg)
 }

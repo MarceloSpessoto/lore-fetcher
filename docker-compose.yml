@@ -5,6 +5,10 @@ services:
       database:
         condition: service_healthy
     network_mode: "host"
+    env_file: lore-fetcher/.env
+    environment:
+      DAEMON: "true"
+    restart: on-failure
   database:
     image: postgres
     network_mode: "host"

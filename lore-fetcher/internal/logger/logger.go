@@ -2,6 +2,9 @@ package logger
 
 import (
 	"bytes"
+	"fmt"
+	"io"
+	"os"
 	"sync"
 )
 
@@ -9,10 +12,15 @@ type Logger struct {
 	mu       sync.Mutex
 	entries  []string
 	onChange func()
+	stdout   io.Writer
 }
 
 func New() *Logger {
 	return &Logger{}
+}
+
+func NewWithStdout() *Logger {
+	return &Logger{stdout: os.Stdout}
 }
 
 func (l *Logger) SetOnChange(fn func()) {
@@ -28,7 +36,11 @@ func (l *Logger) Write(p []byte) (n int, err error) {
 		l.entries = append(l.entries, line)
 	}
 	onChange := l.onChange
+	stdout := l.stdout
 	l.mu.Unlock()
+	if stdout != nil && line != "" {
+		fmt.Fprintln(stdout, line)
+	}
 	if onChange != nil {
 		onChange()
 	}
