@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	"golang.org/x/text/encoding/ianaindex"
 	"lore-fetcher/internal/core/domain"
@@ -23,8 +24,9 @@ type Feed struct {
 }
 
 type LoreRepository struct {
-	feed      Feed
-	subsystem string
+	feed        Feed
+	subsystem   string
+	loreBaseURL string
 }
 
 func NewLoreRepository() *LoreRepository {
@@ -32,11 +34,18 @@ func NewLoreRepository() *LoreRepository {
 	if subsystem == "" {
 		subsystem = "all"
 	}
-	return &LoreRepository{subsystem: subsystem}
+	loreBaseURL := os.Getenv("LORE_BASE_URL")
+	if loreBaseURL == "" {
+		loreBaseURL = "https://lore.kernel.org"
+	}
+	return &LoreRepository{
+		subsystem:   subsystem,
+		loreBaseURL: strings.TrimRight(loreBaseURL, "/"),
+	}
 }
 
 func (lr *LoreRepository) GetRecentPatches() []domain.Patch {
-	fetchUrl := "https://lore.kernel.org/" + lr.subsystem + "/?q=rt:..+AND+NOT+s:Re&x=A"
+	fetchUrl := lr.loreBaseURL + "/" + lr.subsystem + "/?q=rt:..+AND+NOT+s:Re&x=A"
 	resp, err := http.Get(fetchUrl)
 	if err != nil {
 		log.Println("Failed to fetch patches:", err)
